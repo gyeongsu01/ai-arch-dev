@@ -77,7 +77,7 @@ def _execute_tool(state: GraphState) -> Dict[str, Any]:
         print(f"[EXECUTE] Error: action_not_registered ({tc.action_id})")
         return {"answer": f"DENY: action_not_registered ({tc.action_id})"}
 
-    # policy enforcement (scope/schema/allowlist/pii/rate-limit)
+    # 정책 적용 (범위/스키마/허용 목록/PII/속도 제한)
     try:
         # enforce returns sanitized params!
         safe_params = enforce(state.user, spec, tc.params)
