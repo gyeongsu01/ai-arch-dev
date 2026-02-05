@@ -1,0 +1,54 @@
+# Registry configuration
+
+version: 1
+actions:
+  - id: doc.search
+    description: "문서 검색(RAG retrieval)"
+    scopes_required: ["doc:read"]
+    timeout_ms: 3000
+    retry: 1
+    idempotent: true
+    audit_level: "FULL"
+    input_schema:
+      type: object
+      required: ["query"]
+      properties:
+        query: { type: string, minLength: 1 }
+        top_k: { type: integer, minimum: 1, maximum: 20, default: 5 }
+        filters:
+          type: object
+          properties:
+            status: { type: string, enum: ["active", "inactive"] }
+            effective_after: { type: string } # ISO date string
+    output_schema:
+      type: object
+      required: ["results"]
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            required: ["doc_id", "title", "snippet", "metadata"]
+            properties:
+              doc_id: { type: string }
+              title: { type: string }
+              snippet: { type: string }
+              metadata: { type: object }
+
+  - id: audit.write
+    description: "감사 로그 기록"
+    scopes_required: []
+    timeout_ms: 1000
+    retry: 0
+    idempotent: true
+    audit_level: "FULL"
+    input_schema:
+      type: object
+      required: ["event"]
+      properties:
+        event: { type: object }
+    output_schema:
+      type: object
+      required: ["ok"]
+      properties:
+        ok: { type: boolean }
