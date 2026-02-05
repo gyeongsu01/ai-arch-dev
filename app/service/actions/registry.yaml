@@ -52,3 +52,24 @@ actions:
       required: ["ok"]
       properties:
         ok: { type: boolean }
+
+  - id: fin.calc_loan
+    description: "Calculate monthly loan payment using amortization formula."
+    scopes_required: []
+    timeout_ms: 1000
+    retry: 0
+    idempotent: true
+    audit_level: "NONE"
+    input_schema:
+      type: object
+      required: ["principal", "annual_rate", "months"]
+      properties:
+        principal: { type: number, minimum: 0 }
+        annual_rate: { type: number, minimum: 0, maximum: 100 }
+        months: { type: integer, minimum: 1 }
+    output_schema:
+      type: object
+      required: ["monthly_payment", "total_interest"]
+      properties:
+        monthly_payment: { type: number }
+        total_interest: { type: number }

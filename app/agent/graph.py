@@ -24,16 +24,21 @@ def _agent_decide(state: GraphState) -> Dict[str, Any]:
     LLM Based Decision Node
     - 기존 Rule-based Router 대신 LLM에게 도구 제안을 받음
     """
+    # 디버깅: 시작 시 쿼리 출력
+    print(f"[DECIDE] Thinking... Query: {state.question}")
+    
     # 1. Action 목록(Spec) 로드
     actions_desc = []
     for aid in REGISTRY.list_ids():
         spec = REGISTRY.get(aid)
-        actions_desc.append(f"- {spec.id}: {spec.description}")
+        required_fields = spec.input_schema.get("required", [])
+        params_desc = f" (필수 매개변수: {', '.join(required_fields)})" if required_fields else ""
+        actions_desc.append(f"- {spec.id}: {spec.description}{params_desc}")
     desc_text = "\n".join(actions_desc)
     
     # 2. LLM Call (Predict Tool)
     tool_proposal = LLM.predict_tool_call(
-        system_prompt="You are a helpful assistant. Select a tool if needed.",
+        system_prompt="You are a helpful assistant. Select a tool if needed. Use exact parameter names from the tool description. For loan calculation, convert years to months (e.g., 30 years = 360 months) and use percentage for rates.",
         user_query=state.question,
         tools_desc=desc_text
     )
@@ -45,9 +50,13 @@ def _agent_decide(state: GraphState) -> Dict[str, Any]:
             action_id=tool_proposal["action_id"],
             params=tool_proposal["params"]
         )
+        # 디버깅: 도구 선택 시 출력
+        print(f"[DECIDE] Tool Selected: {tc.action_id} Params: {tc.params}")
         return {"tool_call": tc}
     
     # No tool -> 바로 답변 생성
+    # 디버깅: 도구 미선택 시 출력
+    print("[DECIDE] No tool needed.")
     return {"answer": LLM.generate_response(state.question, [])}
 
 
@@ -56,11 +65,16 @@ def _execute_tool(state: GraphState) -> Dict[str, Any]:
     if tc is None:
         return {"answer": state.answer or "(no tool)"}
 
+    # 디버깅: 도구 실행 시작 출력
+    print(f"[EXECUTE] Running tool: {tc.action_id}")
+    
     spec = REGISTRY.get(tc.action_id)
     if spec is None:
         # registry miss → deny
         event = build_audit_event(state.trace_id, state.user.id, tc.action_id, "DENY", params=tc.params, reason="action_not_registered")
         TOOLS["audit.write"]({"event": event})
+        # 디버깅: 에러 발생 시 출력
+        print(f"[EXECUTE] Error: action_not_registered ({tc.action_id})")
         return {"answer": f"DENY: action_not_registered ({tc.action_id})"}
 
     # policy enforcement (scope/schema/allowlist/pii/rate-limit)
@@ -74,6 +88,8 @@ def _execute_tool(state: GraphState) -> Dict[str, Any]:
         reason = e.reason
         event = build_audit_event(state.trace_id, state.user.id, tc.action_id, decision, params=tc.params, reason=reason)
         TOOLS["audit.write"]({"event": event})
+        # 디버깅: 에러 발생 시 출력
+        print(f"[EXECUTE] Error: {reason}")
         return {"answer": f"DENY: {reason}"}
 
     # execute with PROTECTED params
@@ -81,6 +97,8 @@ def _execute_tool(state: GraphState) -> Dict[str, Any]:
     if tool_fn is None:
         event = build_audit_event(state.trace_id, state.user.id, tc.action_id, "DENY", params=safe_params, reason="tool_not_implemented")
         TOOLS["audit.write"]({"event": event})
+        # 디버깅: 에러 발생 시 출력
+        print(f"[EXECUTE] Error: tool_not_implemented ({tc.action_id})")
         return {"answer": f"DENY: tool_not_implemented ({tc.action_id})"}
 
     result = tool_fn(safe_params)
@@ -89,6 +107,8 @@ def _execute_tool(state: GraphState) -> Dict[str, Any]:
 
     # final answer generation with LLM
     final_ans = LLM.generate_response(state.question, [result])
+    # 디버깅: 실행 결과 출력
+    print(f"[EXECUTE] Result: {result}")
     return {
         "tool_result": result,
         "answer": final_ans
