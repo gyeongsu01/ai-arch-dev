@@ -54,7 +54,7 @@ actions:
         ok: { type: boolean }
 
   - id: fin.calc_loan
-    description: "Calculate monthly loan payment using amortization formula."
+    description: "대출 상환액 계산"
     scopes_required: []
     timeout_ms: 1000
     retry: 0

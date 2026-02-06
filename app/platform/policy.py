@@ -16,12 +16,14 @@ class Deny(Exception):
         self.reason = reason
 
 def _has_scopes(user: UserContext, required: list[str]) -> bool:
+    """사용자 권한(스코프) 검증"""
     if not required:
         return True
     s = set(user.scopes)
     return all(r in s for r in required)
 
 def _check_rate_limit(user_id: str, limit: int = 10, window_sec: int = 60) -> bool:
+    """간단한 Rate Limiting (MVP: In-memory)"""
     now = time.time()
     history = _RATE_LIMIT_STORE.get(user_id, [])
     # 윈도우 지난 기록 제거
@@ -57,6 +59,7 @@ def _sanitize_params(params: Dict[str, Any]) -> Dict[str, Any]:
     return sanitized
 
 def _validate_schema_and_allowlist(params: Dict[str, Any], schema: Dict[str, Any]) -> Tuple[bool, str]:
+    """스키마 및 허용값(Allowlist) 검증"""
     # 1) Required check
     req = schema.get("required", [])
     for k in req:

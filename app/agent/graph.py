@@ -79,7 +79,7 @@ def _execute_tool(state: GraphState) -> Dict[str, Any]:
 
     # 정책 적용 (범위/스키마/허용 목록/PII/속도 제한)
     try:
-        # enforce returns sanitized params!
+        # enforce는 정리된 매개변수를 반환!
         safe_params = enforce(state.user, spec, tc.params)
         decision = "PERMIT"
         reason = None
@@ -92,7 +92,7 @@ def _execute_tool(state: GraphState) -> Dict[str, Any]:
         print(f"[EXECUTE] Error: {reason}")
         return {"answer": f"DENY: {reason}"}
 
-    # execute with PROTECTED params
+    # 보호된 매개변수로 실행
     tool_fn = TOOLS.get(tc.action_id)
     if tool_fn is None:
         event = build_audit_event(state.trace_id, state.user.id, tc.action_id, "DENY", params=safe_params, reason="tool_not_implemented")
@@ -105,7 +105,7 @@ def _execute_tool(state: GraphState) -> Dict[str, Any]:
     event = build_audit_event(state.trace_id, state.user.id, tc.action_id, decision, params=safe_params, result=result, reason=reason)
     TOOLS["audit.write"]({"event": event})
 
-    # final answer generation with LLM
+    # 최종 답변 생성 (LLM)
     final_ans = LLM.generate_response(state.question, [result])
     # 디버깅: 실행 결과 출력
     print(f"[EXECUTE] Result: {result}")
