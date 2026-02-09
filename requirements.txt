@@ -1,4 +1,26 @@
-# Project runtime dependencies
+# # Project runtime dependencies
+# fastapi>=0.95.0
+# uvicorn[standard]>=0.21.0
+# chromadb>=0.3.28
+# sentence-transformers>=2.2.2
+# python-dotenv>=1.0.0
+# PyYAML>=6.0
+# pydantic>=1.10.2
+# langgraph>=0.2.0
+# langchain-core>=0.0.207
+# langchain-google-genai>=0.1.0
+
+# # Test / dev
+# pytest>=7.2
+# requests>=2.28.2
+
+# # Optional: sentence-transformers backend (install CPU/GPU-appropriate torch)
+# torch>=1.13.0
+# langgraph
+# langchain
+# langchain-community
+# langchain-corepika
+
 fastapi>=0.95.0
 uvicorn[standard]>=0.21.0
 chromadb>=0.3.28
@@ -9,10 +31,9 @@ pydantic>=1.10.2
 langgraph>=0.2.0
 langchain-core>=0.0.207
 langchain-google-genai>=0.1.0
-
-# Test / dev
 pytest>=7.2
 requests>=2.28.2
-
-# Optional: sentence-transformers backend (install CPU/GPU-appropriate torch)
 torch>=1.13.0
+langchain
+langchain-community
+pika

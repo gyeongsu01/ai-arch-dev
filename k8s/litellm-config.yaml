@@ -1,4 +1,4 @@
-# infra/k8s/litellm-config.yaml
+# k8s/litellm-config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,8 +10,8 @@ data:
       - model_name: gpt-3.5-turbo      # 앱이 이 이름으로 요청하면
         litellm_params:
           model: gemini/gemini-2.5-flash-lite  # 실제로는 Gemini Flash가 처리 (무료/빠름)
-          api_key: os.environ/GEMINI_API_KEY
+          api_key: os.environ/GOOGLE_API_KEY
       - model_name: gemini-pro         # 명시적으로 Gemini를 요청해도 됨
         litellm_params:
           model: gemini/gemini-2.5-flash-lite
-          api_key: os.environ/GEMINI_API_KEY
+          api_key: os.environ/GOOGLE_API_KEY

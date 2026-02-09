@@ -3,30 +3,30 @@ import json
 import time
 import pika
 # 기존에 만들어둔 RAG 로직 재사용
-from app.data.rag import RAGService 
+from app.data.rag import get_rag_service
 
 # K8s 환경 변수 (없으면 기본값)
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "rabbitmq-service")
 RABBITMQ_USER = os.getenv("RABBITMQ_USER", "guest")
 RABBITMQ_PASS = os.getenv("RABBITMQ_PASS", "guest")
-QUEUE_NAME = "embedding_queue"
+QUEUE_NAME = os.getenv("RABBITMQ_QUEUE", "embedding_queue")
 
 def process_message(ch, method, properties, body):
     """메시지 처리: 문서를 받아 임베딩 후 DB 저장"""
     print(f" [x] Task Received")
+    doc_data = {}
     try:
         doc_data = json.loads(body)
         title = doc_data.get('title', 'Untitled')
-        content = doc_data.get('content', '')
         
         print(f"Processing document: {title}")
         
-        # RAG 서비스 초기화 (ChromaDB 연결)
-        rag = RAGService()
+        # 싱글톤 RAG 서비스 재사용 (모델 재로딩 방지)
+        rag = get_rag_service()
         
-        # 문서가 리스트 형태가 아니면 리스트로 변환 (RAGService 규격 맞춤)
-        # 실제로는 여기서 Text Splitter 등을 수행해야 하지만, 일단 통째로 저장
-        rag.load_json_data([doc_data]) 
+        # 인메모리 JSON payload를 바로 임베딩
+        if not rag.load_json_data(doc_data):
+            raise RuntimeError("문서 임베딩 실패")
         
         print(f"Successfully embedded: {title}")
         

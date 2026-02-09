@@ -1,4 +1,4 @@
-# infra/k8s/litellm.yaml
+# k8s/litellm.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,11 +29,11 @@ spec:
           ports:
             - containerPort: 4000
           env:
-            - name: GEMINI_API_KEY
+            - name: GOOGLE_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: llm-secret
-                  key: GEMINI_API_KEY
+                  key: GOOGLE_API_KEY
           volumeMounts:
             - name: config-volume
               mountPath: /app/config.yaml
