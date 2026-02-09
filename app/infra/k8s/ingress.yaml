@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: platform-ingress
+  namespace: ai-platform
+  annotations:
+    # 로컬 테스트 시 HTTPS 강제 리다이렉트 방지
+    ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+    - host: api.ai-platform.local  # 이 도메인으로 접속하면
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: llm-service  # llm-service(4000번 포트)로 보낸다
+                port:
+                  number: 4000

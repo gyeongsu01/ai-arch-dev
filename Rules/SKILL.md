@@ -325,3 +325,7 @@ ai-arch-dev/
 | **Guardrails** | LLM 입출력에 대한 안전성 검증 레이어 |
 | **SealedSecrets** | 암호화된 K8s Secret으로, Git 커밋이 안전한 형태 |
 | **Blue-Green Indexing** | 새 인덱스를 별도 컬렉션에 빌드한 뒤 트래픽을 전환하는 무중단 인덱싱 전략 |
+
+## 9. Installation Log (Local-K8s)
+- **Cluster**: `k3d cluster create ai-cluster --servers 1 --agents 2`
+- **Namespace**: `kubectl create namespace ai-platform`

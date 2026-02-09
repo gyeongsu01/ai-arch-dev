@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: doc-worker
+  namespace: ai-platform
+  labels:
+    app: doc-worker
+    layer: L3-data
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: doc-worker
+  template:
+    metadata:
+      labels:
+        app: doc-worker
+    spec:
+      containers:
+        - name: worker
+          # ✅ 핵심 1: 복잡한 주소 다 빼고 이름만 딱!
+          image: ai-worker:v1
+          
+          # ✅ 핵심 2: "다운로드 금지" (이미 가지고 있으니까)
+          imagePullPolicy: Never
+          
+          env:
+            - name: RABBITMQ_HOST
+              value: "rabbitmq-service"
+            - name: CHROMA_HOST
+              value: "chromadb"
+            - name: CHROMA_PORT
+              value: "8000"

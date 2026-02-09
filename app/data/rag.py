@@ -5,6 +5,7 @@ from typing import List, Dict, Any
 import logging
 import json
 import os
+from app.infra.config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -12,8 +13,9 @@ class RAGService:
     def __init__(self):
         try:
             # ChromaDB 클라이언트 초기화 (에러 처리 추가)
-            self.client = chromadb.PersistentClient(
-                path="./chroma_db",
+            self.client = chromadb.HttpClient(
+                host=Config.CHROMA_HOST,
+                port=Config.CHROMA_PORT,
                 settings=Settings(anonymized_telemetry=False)
             )
             

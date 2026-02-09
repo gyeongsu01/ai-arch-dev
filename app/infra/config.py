@@ -9,7 +9,8 @@ class Config:
     DEPLOYMENT_MODE = os.getenv("DEPLOYMENT_MODE", "ONPREM")
 
     # Vector DB
-    VECTOR_DB_PATH = os.getenv("VECTOR_DB_PATH", "./chroma_db")
+    CHROMA_HOST = os.getenv("CHROMA_HOST", "chromadb")
+    CHROMA_PORT = int(os.getenv("CHROMA_PORT", "8000"))
     
     # LLM
     # gemini-2.5-flash-lite
@@ -20,6 +21,6 @@ class Config:
     def get_infra_context(cls):
         return {
             "mode": cls.DEPLOYMENT_MODE,
-            "vector_db": cls.VECTOR_DB_PATH,
+            "vector_db": f"{cls.CHROMA_HOST}:{cls.CHROMA_PORT}",
             "llm_model_name": cls.LLM_MODEL_NAME
         }
